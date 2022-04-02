@@ -14,7 +14,7 @@ class TestInventoryApp(unittest.TestCase):
         self.app.testing=True
         self.client=self.app.test_client()
         
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = environ['SQLALCHEMY_DATABASE_URI']
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URI']
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db.app = self.app
         db.init_app(self.app)

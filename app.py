@@ -1,4 +1,4 @@
-#import os
+from os import environ
 from flask import Flask, redirect, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -11,7 +11,7 @@ def create_app(test_config=None):
   app = Flask(__name__)
   CORS(app)
 
-  app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///tmp_sqlite_db/main.db'
+  app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URI']
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   #db = SQLAlchemy(app)  #already created in the models file for use there, and imported along with the models
   db.app = app
@@ -21,10 +21,10 @@ def create_app(test_config=None):
 
   @app.route('/login')
   def login():
-    DOMAIN='dav-eng-code-testing.eu.auth0.com'
-    API_IDENTIFIER='https://productivity-inventory.herokuapp.com/'
-    CLIENT_ID='Q7pQU8jGRAiOCGEqn55STzPPmevq3rsb'
-    CALLBACK_URL='http://localhost:5000'
+    DOMAIN=environ['DOMAIN']
+    API_IDENTIFIER=environ['API_AUDIENCE']
+    CLIENT_ID=environ['CLIENT_ID']
+    CALLBACK_URL=environ['CALLBACK_URL']
     address=f'https://{DOMAIN}/authorize?'\
             f'audience={API_IDENTIFIER}&'\
             f'response_type=token&'\
