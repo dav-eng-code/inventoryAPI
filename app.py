@@ -11,7 +11,7 @@ def create_app(test_config=None):
   app = Flask(__name__)
   CORS(app)
 
-  app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URI']
+  app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URL']
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   #db = SQLAlchemy(app)  #already created in the models file for use there, and imported along with the models
   db.app = app
