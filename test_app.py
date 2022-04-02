@@ -14,7 +14,9 @@ class TestInventoryApp(unittest.TestCase):
         self.app.testing=True
         self.client=self.app.test_client()
         
-        self.app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URL']
+        DATABASE_URL=environ['DATABASE_URL'].replace('postgres://','postgresql://',1)
+  
+        self.app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
         self.app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
         db.app = self.app
         db.init_app(self.app)

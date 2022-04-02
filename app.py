@@ -11,7 +11,9 @@ def create_app(test_config=None):
   app = Flask(__name__)
   CORS(app)
 
-  app.config['SQLALCHEMY_DATABASE_URI'] = environ['DATABASE_URL']
+  DATABASE_URL=environ['DATABASE_URL'].replace('postgres://','postgresql://',1)
+  
+  app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   #db = SQLAlchemy(app)  #already created in the models file for use there, and imported along with the models
   db.app = app
