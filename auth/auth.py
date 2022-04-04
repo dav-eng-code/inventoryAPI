@@ -32,7 +32,7 @@ def get_token_auth_header():
         raise AuthError({
             'code':'authorization_header_missing',
             'description':'Authorization header is missing'
-        },401)
+            },401)
         
     parts = auth_header.split(' ')
 
@@ -40,12 +40,12 @@ def get_token_auth_header():
         raise AuthError({
             'code':'invalid_header',
             'description':'Authorization header is missing Bearer'
-        },401)
+            },401)
     elif len(parts)!=2:
         raise AuthError({
             'code':'invalid_header',
             'description':'Authorization header should have only two parts'
-        },401)
+            },401)
 
     token = parts[1]
     return token
@@ -108,6 +108,7 @@ def requires_auth(permission=''):
             #check the payload contains the required permission
             check_permissions(permission, payload)
 
+            
             return f(payload, *args,**kwargs)
         return wrapper
     return requires_auth_decorator

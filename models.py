@@ -12,7 +12,7 @@ class Container(db.Model):
     name = db.Column(db.String(),unique=True,nullable=False)
     location = db.Column(db.String(),nullable=False)
     container_value=db.Column(db.Integer)
-    total_value = db.Column(db.Integer)
+    total_value = db.Column(db.Integer,nullable=False,default=0)
 
     def insert(self):
         db.session.add(self)
