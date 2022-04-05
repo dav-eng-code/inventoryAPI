@@ -102,12 +102,15 @@ def create_app(test_config=None):
     c = Container.query.filter(Container.name==data['name']).one_or_none()
     if c!=None:
       abort(409)
-    container = Container(
-      name=data['name'],
-      location=data['location'],
-      container_value=data['container_value']
-      )
-    container.insert()
+    try:
+      container = Container(
+        name=data['name'],
+        location=data['location'],
+        container_value=data['container_value']
+        )
+      container.insert()
+    except:
+      abort(422)
     response={
       'success':True,
       'Total Containers':len(Container.query.all())
@@ -218,12 +221,15 @@ def create_app(test_config=None):
     i = Item.query.filter(Item.name==data['name']).one_or_none()
     if i!=None:
       abort(409)
-    item = Item(
-      name=data['name'],
-      location=data['location'],
-      value=data['value'],
-      status=data['status']
-      )
+    try:
+      item = Item(
+        name=data['name'],
+        location=data['location'],
+        value=data['value'],
+        status=data['status']
+        )
+    except:
+      abort(422)
     if 'tag' in data:
       item.tag=data['tag']
     if 'location' in data:
