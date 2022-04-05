@@ -289,8 +289,8 @@ def create_app(test_config=None):
       if 'location' in data and data['location']!=container.location:
         abort(409)
       item.container_id=data['container_id']
-      container.contents_value=container.contents_value+item.value
-      container.total_value=container.container_value+container.contents_value
+      container.contents_value=int(container.contents_value)+int(item.value)
+      container.total_value=int(container.container_value)+int(container.contents_value)
       container.date_updated=datetime.utcnow()
     try:
       item.update()
