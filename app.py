@@ -73,7 +73,7 @@ def create_app(test_config=None):
       'location':container.location,
       'container_value':container.container_value,
       'total_value':container.total_value,
-      'items':container.items
+      'items':[item.name for item in container.items]
     }
     return response
 
@@ -89,7 +89,7 @@ def create_app(test_config=None):
       'location':container.location,
       'container_value':container.container_value,
       'total_value':container.total_value,
-      'items':container.items
+      'items':[item.name for item in container.items]
     }
     return response
 
@@ -139,7 +139,12 @@ def create_app(test_config=None):
     container.update()
     response={
       'success':True,
-      'Total Containers':len(Container.query.all())
+      'id':container.id,
+      'name':container.name,
+      'location':container.location,
+      'container_value':container.container_value,
+      'total_value':container.total_value,
+      'items':[item.name for item in container.items]
       }
     return response
 
@@ -169,7 +174,9 @@ def create_app(test_config=None):
       'id':container.id,
       'name':container.name,
       'location':container.location,
-      'container_value':container.container_value
+      'container_value':container.container_value,
+      'total_value':container.total_value,
+      'items':[item.name for item in container.items]
     }
     return response
 
