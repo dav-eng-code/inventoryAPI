@@ -348,8 +348,9 @@ def create_app(test_config=None):
     data={
       'success':False,
       'error':error.code,
-      'message':'The identification of the item you seek to update'\
-                ' conflicts with the name you purport it to have.'\
+      'message':'Either the identification of the item you seek to update'\
+                ' conflicts with the name you purport it to have,'\
+                ' or you are providing a duplicate value.'\
                 ' Please review and amend your request.'
     }
     return jsonify(data),error.code
@@ -359,7 +360,7 @@ def create_app(test_config=None):
     data={
       'success':False,
       'error':error.code,
-      'message':'The thing which it is that are trying to add'\
+      'message':'The thing which it is that are you trying to add'\
                 ' you have not availed of the appropriate data'\
                 ' that is required for the thing you desire to add.'
     }

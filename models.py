@@ -33,10 +33,10 @@ class Item(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(),unique=True,nullable=False)
     tag = db.Column(db.String())
-    location = db.Column(db.String(),unique=True,nullable=False)  #item's location as indepenant item, but must take container locaiton when added to a location
+    location = db.Column(db.String(),nullable=False)  #item's location as indepenant item, but must take container locaiton when added to a location
     container_id = db.Column(db.Integer, db.ForeignKey('containers.id'))
     #container = db.relationship('Container',backref=db.backref('items',lazy=True))
-    value = db.Column(db.Integer,unique=True,nullable=False)
+    value = db.Column(db.Integer,nullable=False)
     status = db.Column(db.String(), nullable=False)
     date_updated = db.Column(db.DateTime,nullable=False,default=datetime.utcnow)
 
