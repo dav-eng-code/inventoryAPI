@@ -264,6 +264,8 @@ def create_app(test_config=None):
       data = request.get_json()
     except:
       abort(422)
+    if 'name' not in data or 'id' not in data:
+      abort(422)
     id=data['id']
     item = Item.query.filter(Item.id==id).one_or_none()
     if item==None:
