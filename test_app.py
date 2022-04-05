@@ -29,25 +29,27 @@ class TestInventoryApp(unittest.TestCase):
 
     #execute this function are every test
     def tearDown(self):
-        c=Container.query.filter(Container.name=='myNewContainer').one_or_none()        
-        if not c == None:
-            c.delete()
-        c=Container.query.filter(Container.name=='shortlivedcontainer').one_or_none()        
-        if not c == None:
-            c.delete()
-        c=Container.query.filter(Container.id==4321).one_or_none()        
-        if not c == None:
-            c.delete()
+        db.drop_all()
+        db.create_all()
+        # c=Container.query.filter(Container.name=='myNewContainer').one_or_none()        
+        # if not c == None:
+        #     c.delete()
+        # c=Container.query.filter(Container.name=='shortlivedcontainer').one_or_none()        
+        # if not c == None:
+        #     c.delete()
+        # c=Container.query.filter(Container.id==4321).one_or_none()        
+        # if not c == None:
+        #     c.delete()
 
-        c=Item.query.filter(Item.name=='myNewItem').one_or_none()        
-        if not c == None:
-            c.delete()
-        c=Item.query.filter(Item.name=='shortliveditem').one_or_none()        
-        if not c == None:
-            c.delete()
-        c=Item.query.filter(Item.id==4321).one_or_none()        
-        if not c == None:
-            c.delete()
+        # c=Item.query.filter(Item.name=='myNewItem').one_or_none()        
+        # if not c == None:
+        #     c.delete()
+        # c=Item.query.filter(Item.name=='shortliveditem').one_or_none()        
+        # if not c == None:
+        #     c.delete()
+        # c=Item.query.filter(Item.id==4321).one_or_none()        
+        # if not c == None:
+        #     c.delete()
 
     #test the root endpoint, GET /
     def test_homepage(self):
@@ -100,7 +102,6 @@ class TestInventoryApp(unittest.TestCase):
             self.assertEqual(data['location'],'over_there')
             self.assertEqual(data['container_value'],3000)
             self.assertIsNotNone(data['total_value'])
-            self.prep_remove_container()
     
     def test_get_container_by_name_not_found(self):
         result=self.client.get('/containers/nonexistantcontainer')
@@ -135,6 +136,29 @@ class TestInventoryApp(unittest.TestCase):
             'location':'somewhere',
             'container_value':'0.55'
         })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+    
+    def test_add_container_duplicate_name(self):
+        result=self.client.post('/containers/add',
+        json={
+            'name':'myNewContainer',
+            'location':'somewhere',
+            'container_value':'0.55'
+        })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+        result=self.client.post('/containers/add',
+        json={
+            'name':'myNewContainer',
+            'location':'anywhere',
+            'container_value':777
+        })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,409)
+        self.assertFalse(data['success'])
 
     def test_add_container_unprocessable(self):
         result=self.client.post('/containers/add')
@@ -226,17 +250,17 @@ class TestInventoryApp(unittest.TestCase):
 
         
     #prep functions for use in tests
-    def prep_insert_item(self):
+    def prep_insert_item(self,item_name):
         item = Item(
-        name='shortliveditem',
+        name=item_name,
         location='over_here',
         value=3000,
         status= 'ok'
         )
         item.insert()
 
-    def prep_remove_item(self):
-        c=Item.query.filter(Item.name=='shortliveditem').one_or_none()        
+    def prep_remove_item(self,item_name):
+        c=Item.query.filter(Item.name==item_name).one_or_none()        
         if not c == None:
             c.delete()
 
@@ -257,7 +281,7 @@ class TestInventoryApp(unittest.TestCase):
     #GET items/<string:name>
     def test_get_item_by_name(self):
         #for token in [environ['ADMIN_TOKEN'],environ['MOVER_TOKEN'],environ['ORGANISER_TOKEN'],environ['DOCUMENTER_TOKEN']]:
-            self.prep_insert_item()
+            self.prep_insert_item('shortliveditem')
             result=self.client.get('/items/shortliveditem')#, headers={'Authorization':'Bearer '+token})
             data=json.loads(result.data)
             self.assertEqual(result.status_code,200)
@@ -266,7 +290,6 @@ class TestInventoryApp(unittest.TestCase):
             self.assertEqual(data['name'],'shortliveditem')
             self.assertEqual(data['location'],'over_here')
             self.assertEqual(data['value'],3000)
-            self.prep_remove_item()
     
     def test_get_item_by_name_not_found(self):
         result=self.client.get('/items/nonexistantitem')
@@ -276,7 +299,7 @@ class TestInventoryApp(unittest.TestCase):
 
     #GET items/<int:id>
     def test_get_item_by_id(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.get('/items/1')
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
@@ -301,6 +324,31 @@ class TestInventoryApp(unittest.TestCase):
             'value':'0.56',
             'status':'ok'
         })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+
+    def test_add_item_duplicate_name(self):
+        result=self.client.post('/items/add',
+        json={
+            'name':'myNewItem',
+            'location':'somewhere',
+            'value':'0.56',
+            'status':'ok'
+        })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+        result=self.client.post('/items/add',
+        json={
+            'name':'myNewItem',
+            'location':'elsewhere',
+            'value':56000,
+            'status':'missing'
+        })
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,409)
+        self.assertFalse(data['success'])
 
     def test_add_item_unprocessable(self):
         result=self.client.post('/items/add')
@@ -310,7 +358,7 @@ class TestInventoryApp(unittest.TestCase):
 
     #POST items/update
     def test_update_item(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.patch('/items/update',
         json={
             'id':1,
@@ -335,7 +383,7 @@ class TestInventoryApp(unittest.TestCase):
         self.assertFalse(data['success'])
 
     def test_update_item_unprocessable(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.patch('/items/update',
         json={
             'id':1,
@@ -348,15 +396,15 @@ class TestInventoryApp(unittest.TestCase):
         self.assertFalse(data['success'])
     
     #move item
-    def test_update_item(self):
+    def test_move_item(self):
         self.prep_insert_container('container1')
         self.prep_insert_container('container2')
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.patch('/items/update',
         json={
             'id':1,
             'name':'shortliveditem',
-            'container':1,
+            'container_id':1,
             'date_updated':str(datetime(2022,4,1))
         })
         data=json.loads(result.data)
@@ -368,7 +416,7 @@ class TestInventoryApp(unittest.TestCase):
         json={
             'id':1,
             'name':'shortliveditem',
-            'container':2,
+            'container_id':2,
             'date_updated':str(datetime(2022,4,1))
         })
         data=json.loads(result.data)
@@ -379,7 +427,7 @@ class TestInventoryApp(unittest.TestCase):
 
     #DELETE items/<int:id>
     def test_delete_item(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         self.assertIsNotNone(Item.query.filter(Item.id==1).one_or_none())
         result=self.client.delete('/items/1')
         data=json.loads(result.data)
@@ -395,7 +443,7 @@ class TestInventoryApp(unittest.TestCase):
 
     #POST items/search
     def test_item_search(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.post('/items/search',
         json={
             'search_term':'Lived'
@@ -412,7 +460,7 @@ class TestInventoryApp(unittest.TestCase):
             })
 
     def test_item_search_not_found(self):
-        self.prep_insert_item()
+        self.prep_insert_item('shortliveditem')
         result=self.client.post('/items/search',
         json={
             'search_term':'quack'

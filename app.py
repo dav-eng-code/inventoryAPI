@@ -99,6 +99,9 @@ def create_app(test_config=None):
       data = request.get_json()
     except:
       abort(422)
+    c = Container.query.filter(Container.name==data['name']).one_or_none()
+    if c!=None:
+      abort(409)
     container = Container(
       name=data['name'],
       location=data['location'],
@@ -210,32 +213,37 @@ def create_app(test_config=None):
   def items_add():
     try:
       data = request.get_json()
-      item = Item(
-        name=data['name'],
-        location=data['location'],
-        value=data['value'],
-        status=data['status']
-        )
-      if 'tag' in data:
-        item.tag=data['tag']
-      if 'location' in data:
-        item.location=data['location']
-      if 'value' in data:
-        item.value=data['value']
-      if 'status' in data:
-        item.status=data['status']
-      if 'date_updated' in data:
-        item.date_updated=data['date_updated']
-      if 'container' in data:
-        container=Container.query.get(data['container'])
-        if container==None:
-          abort(409)
-        if data['location']!=container.location:
-          abort(409)
-        container.value=container.value+item.value
-        container.date_updated=datetime.utcnow()
+    except:
+      abort(422)
+    i = Item.query.filter(Item.name==data['name']).one_or_none()
+    if i!=None:
+      abort(409)
+    item = Item(
+      name=data['name'],
+      location=data['location'],
+      value=data['value'],
+      status=data['status']
+      )
+    if 'tag' in data:
+      item.tag=data['tag']
+    if 'location' in data:
+      item.location=data['location']
+    if 'value' in data:
+      item.value=data['value']
+    if 'status' in data:
+      item.status=data['status']
+    if 'date_updated' in data:
+      item.date_updated=data['date_updated']
+    if 'container' in data:
+      container=Container.query.get(data['container'])
+      if container==None:
+        abort(409)
+      if data['location']!=container.location:
+        abort(409)
+      container.value=container.value+item.value
+      container.date_updated=datetime.utcnow()
+    try:
       item.insert()
-      container.update()
     except:
       abort(422)
     response={
@@ -248,38 +256,42 @@ def create_app(test_config=None):
   def item_update():
     try:
       data = request.get_json()
-      id=data['id']
-      item = Item.query.filter(Item.id==id).one_or_none()
-      if item==None:
-        abort(404)
-      if data['name']!=item.name:
+    except:
+      abort(422)
+    id=data['id']
+    item = Item.query.filter(Item.id==id).one_or_none()
+    if item==None:
+      abort(404)
+    if data['name']!=item.name:
+      abort(409)
+    if 'tag' in data:
+      item.tag=data['tag']
+    if 'location' in data:
+      item.location=data['location']
+    if 'value' in data:
+      item.value=data['value']
+    if 'status' in data:
+      item.status=data['status']
+    if 'date_updated' in data:
+      item.date_updated=datetime.strptime(data['date_updated'],'%Y-%m-%d %H:%M:%S')
+    if 'container_id' in data:
+      container=Container.query.get(data['container_id'])
+      if container==None:
         abort(409)
-      if 'tag' in data:
-        item.tag=data['tag']
-      if 'location' in data:
-        item.location=data['location']
-      if 'value' in data:
-        item.value=data['value']
-      if 'status' in data:
-        item.status=data['status']
-      if 'date_updated' in data:
-        item.date_updated=datetime.strptime(data['date_updated'],'%Y-%m-%d %H:%M:%S')
-      if 'container' in data:
-          container=Container.query.get(data['container'])
-          if container==None:
-            abort(409)
-          if data['location']!=container.location:
-            abort(409)
-          container.value=container.value+item.value
-          container.date_updated=datetime.utcnow()
+      if 'location' in data and data['location']!=container.location:
+        abort(409)
+      item.container_id=data['container_id']
+      container.contents_value=container.contents_value+item.value
+      container.total_value=container.container_value+container.contents_value
+      container.date_updated=datetime.utcnow()
+    try:
       item.update()
-      container.update()
     except:
       abort(422)
     response={
       'success':True,
       'Total Items':len(Item.query.all()),
-      'container':data['container']
+      'container':item.container_id
       }
     return response
 
