@@ -166,17 +166,22 @@ def create_app(test_config=None):
       search_term=data['search_term'].lower()
     except:
       abort(422)
-    container=Container.query.filter(Container.name.ilike('%'+search_term+'%')).one_or_none()
-    if container == None:
+    c=Container.query.filter(Container.name.ilike('%'+search_term+'%')).all()
+    if c == []:
       abort(404)
+    containers=[]
+    for container in c:
+      containers.append({
+        'id':container.id,
+        'name':container.name,
+        'location':container.location,
+        'container_value':container.container_value,
+        'total_value':container.total_value,
+        'items':[item.name for item in container.items]
+      })
     response={
       'success':True,
-      'id':container.id,
-      'name':container.name,
-      'location':container.location,
-      'container_value':container.container_value,
-      'total_value':container.total_value,
-      'items':[item.name for item in container.items]
+      'results':containers
     }
     return response
 
@@ -328,15 +333,20 @@ def create_app(test_config=None):
       search_term=data['search_term'].lower()
     except:
       abort(422)
-    item=Item.query.filter(Item.name.ilike('%'+search_term+'%')).one_or_none()
-    if item == None:
+    i=Item.query.filter(Item.name.ilike('%'+search_term+'%')).all()
+    if i == []:
       abort(404)
+    items=[]
+    for item in i:
+      items.append({
+        'id':item.id,
+        'name':item.name,
+        'location':item.location,
+        'value':item.value
+      })
     response={
       'success':True,
-      'id':item.id,
-      'name':item.name,
-      'location':item.location,
-      'value':item.value
+      'results':items
     }
     return response
 

@@ -228,8 +228,7 @@ class TestInventoryApp(unittest.TestCase):
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
-        self.assertTrue(data,{
-            'success':True,
+        self.assertTrue(data['results'][0],{
             'id':1,
             'name':'shortlivedcontainer',
             'location':'over_there',
@@ -451,8 +450,7 @@ class TestInventoryApp(unittest.TestCase):
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
-        self.assertTrue(data,{
-            'success':True,
+        self.assertTrue(data['results'][0],{
             'id':1,
             'name':'shortliveditem',
             'location':'over_here',
