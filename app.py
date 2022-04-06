@@ -138,6 +138,7 @@ def create_app(test_config=None):
         item.location=container.location
     if 'container_value' in data:
       container.container_value=data['container_value']
+      container.total_value=int(container.container_value)+int(container.contents_value)
     container.update()
     response={
       'success':True,
@@ -260,7 +261,7 @@ def create_app(test_config=None):
         abort(409)
       if data['location']!=container.location:
         abort(409)
-      container.value=container.value+item.value
+      container.contents_value=int(container.contents_value)+int(item.value)
       container.date_updated=datetime.utcnow()
     try:
       item.insert()
@@ -289,10 +290,11 @@ def create_app(test_config=None):
     if 'tag' in data:
       item.tag=data['tag']
     if 'location' in data:
-      if item.container_id!=None:
+      if item.container_id!=None and Container.query.get(item.container_id).location!=data['location']:
         abort(409)
       item.location=data['location']
     if 'value' in data:
+      original_value=item.value
       item.value=data['value']
     if 'status' in data:
       item.status=data['status']
@@ -307,7 +309,7 @@ def create_app(test_config=None):
       else:
         item.location=container.location
       item.container_id=data['container_id']
-      container.contents_value=int(container.contents_value)+int(item.value)
+      container.contents_value=int(container.contents_value)-int(original_value)+int(item.value)
       container.total_value=int(container.container_value)+int(container.contents_value)
       container.date_updated=datetime.utcnow()
     try:
