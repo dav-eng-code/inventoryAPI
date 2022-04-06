@@ -134,6 +134,8 @@ def create_app(test_config=None):
     #     container[attribute]=data[attribute]
     if 'location' in data:
       container.location=data['location']
+      for item in container.items:
+        item.location=container.location
     if 'container_value' in data:
       container.container_value=data['container_value']
     container.update()
@@ -287,6 +289,8 @@ def create_app(test_config=None):
     if 'tag' in data:
       item.tag=data['tag']
     if 'location' in data:
+      if item.container_id!=None:
+        abort(409)
       item.location=data['location']
     if 'value' in data:
       item.value=data['value']
@@ -300,6 +304,8 @@ def create_app(test_config=None):
         abort(409)
       if 'location' in data and data['location']!=container.location:
         abort(409)
+      else:
+        item.location=container.location
       item.container_id=data['container_id']
       container.contents_value=int(container.contents_value)+int(item.value)
       container.total_value=int(container.container_value)+int(container.contents_value)
