@@ -75,36 +75,33 @@ class TestInventoryApp(unittest.TestCase):
         if not c == None:
             c.delete()
 
+    token = environ['ADMIN_TOKEN']
+
     #GET containers/
     def test_get_containers(self):
-        #need to include authorization header in request
-        token=environ['ADMIN_TOKEN']
-
-        #repeat with different role tokens
-        #check that it fails both with wrong role and without any token
-        result=self.client.get('/containers', headers={'Authorization':'Bearer '+token})
+        result=self.client.get('/containers', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
         self.assertGreaterEqual(data['Total Containers'],0)
         self.assertIsNotNone(data['Containers List'])
 
+
     #GET containers/<string:name>
     def test_get_container_by_name(self):
-        #for token in [environ['ADMIN_TOKEN'],environ['MOVER_TOKEN'],environ['ORGANISER_TOKEN'],environ['DOCUMENTER_TOKEN']]:
-            self.prep_insert_container('shortlivedcontainer')
-            result=self.client.get('/containers/shortlivedcontainer')#, headers={'Authorization':'Bearer '+token})
-            data=json.loads(result.data)
-            self.assertEqual(result.status_code,200)
-            self.assertTrue(data['success'])
-            self.assertEqual(data['id'],1)
-            self.assertEqual(data['name'],'shortlivedcontainer')
-            self.assertEqual(data['location'],'over_there')
-            self.assertEqual(data['container_value'],3000)
-            self.assertIsNotNone(data['total_value'])
+        self.prep_insert_container('shortlivedcontainer')
+        result=self.client.get('/containers/shortlivedcontainer', headers={'Authorization':'Bearer '+self.token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['id'],1)
+        self.assertEqual(data['name'],'shortlivedcontainer')
+        self.assertEqual(data['location'],'over_there')
+        self.assertEqual(data['container_value'],3000)
+        self.assertIsNotNone(data['total_value'])
     
     def test_get_container_by_name_not_found(self):
-        result=self.client.get('/containers/nonexistantcontainer')
+        result=self.client.get('/containers/nonexistantcontainer', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -112,7 +109,7 @@ class TestInventoryApp(unittest.TestCase):
     #GET containers/<int:id>
     def test_get_container_by_id(self):
         self.prep_insert_container('shortlivedcontainer')
-        result=self.client.get('/containers/1')
+        result=self.client.get('/containers/1', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -123,7 +120,7 @@ class TestInventoryApp(unittest.TestCase):
         self.assertIsNotNone(data['total_value'])
 
     def test_get_container_by_id_not_found(self):
-        result=self.client.get('/containers/4321')
+        result=self.client.get('/containers/4321', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -135,7 +132,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'myNewContainer',
             'location':'somewhere',
             'container_value':'0.55'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -146,7 +143,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'myNewContainer',
             'location':'somewhere',
             'container_value':'0.55'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -155,13 +152,13 @@ class TestInventoryApp(unittest.TestCase):
             'name':'myNewContainer',
             'location':'anywhere',
             'container_value':777
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,409)
         self.assertFalse(data['success'])
 
     def test_add_container_unprocessable(self):
-        result=self.client.post('/containers/add')
+        result=self.client.post('/containers/add', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,422)
         self.assertFalse(data['success'])
@@ -174,7 +171,7 @@ class TestInventoryApp(unittest.TestCase):
             'id':1,
             'name':'shortlivedcontainer',
             'container_value':777
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -185,7 +182,7 @@ class TestInventoryApp(unittest.TestCase):
             'id':1,
             'name':'shortlivedcontainer',
             'container_value':777
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -197,7 +194,7 @@ class TestInventoryApp(unittest.TestCase):
             'id':1,
             'name':'wrongName',
             'container_value':777
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,409)
         self.assertFalse(data['success'])
@@ -206,14 +203,14 @@ class TestInventoryApp(unittest.TestCase):
     def test_delete_container(self):
         self.prep_insert_container('shortlivedcontainer')
         self.assertIsNotNone(Container.query.filter(Container.id==1).one_or_none())
-        result=self.client.delete('/containers/1')
+        result=self.client.delete('/containers/1', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
         self.assertIsNone(Container.query.filter(Container.id==1).one_or_none())
 
     def test_delete_container_not_found(self):
-        result=self.client.delete('/containers/4321')
+        result=self.client.delete('/containers/4321', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -224,7 +221,7 @@ class TestInventoryApp(unittest.TestCase):
         result=self.client.post('/containers/search',
         json={
             'search_term':'Lived'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -240,7 +237,7 @@ class TestInventoryApp(unittest.TestCase):
         result=self.client.post('/containers/search',
         json={
             'search_term':'quack'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -265,12 +262,7 @@ class TestInventoryApp(unittest.TestCase):
 
     #GET items/
     def test_get_items(self):
-        #need to include authorization header in request
-        token=environ['ADMIN_TOKEN']
-
-        #repeat with different role tokens
-        #check that it fails both with wrong role and without any token
-        result=self.client.get('/items', headers={'Authorization':'Bearer '+token})
+        result=self.client.get('/items', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -279,19 +271,18 @@ class TestInventoryApp(unittest.TestCase):
 
     #GET items/<string:name>
     def test_get_item_by_name(self):
-        #for token in [environ['ADMIN_TOKEN'],environ['MOVER_TOKEN'],environ['ORGANISER_TOKEN'],environ['DOCUMENTER_TOKEN']]:
-            self.prep_insert_item('shortliveditem')
-            result=self.client.get('/items/shortliveditem')#, headers={'Authorization':'Bearer '+token})
-            data=json.loads(result.data)
-            self.assertEqual(result.status_code,200)
-            self.assertTrue(data['success'])
-            self.assertEqual(data['id'],1)
-            self.assertEqual(data['name'],'shortliveditem')
-            self.assertEqual(data['location'],'over_here')
-            self.assertEqual(data['value'],3000)
+        self.prep_insert_item('shortliveditem')
+        result=self.client.get('/items/shortliveditem', headers={'Authorization':'Bearer '+self.token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+        self.assertEqual(data['id'],1)
+        self.assertEqual(data['name'],'shortliveditem')
+        self.assertEqual(data['location'],'over_here')
+        self.assertEqual(data['value'],3000)
     
     def test_get_item_by_name_not_found(self):
-        result=self.client.get('/items/nonexistantitem')
+        result=self.client.get('/items/nonexistantitem', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -299,7 +290,7 @@ class TestInventoryApp(unittest.TestCase):
     #GET items/<int:id>
     def test_get_item_by_id(self):
         self.prep_insert_item('shortliveditem')
-        result=self.client.get('/items/1')
+        result=self.client.get('/items/1', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -309,7 +300,7 @@ class TestInventoryApp(unittest.TestCase):
         self.assertEqual(data['value'],3000)
 
     def test_get_item_by_id_not_found(self):
-        result=self.client.get('/items/4321')
+        result=self.client.get('/items/4321', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -322,7 +313,7 @@ class TestInventoryApp(unittest.TestCase):
             'location':'somewhere',
             'value':'0.56',
             'status':'ok'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -334,7 +325,7 @@ class TestInventoryApp(unittest.TestCase):
             'location':'somewhere',
             'value':'0.56',
             'status':'ok'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -344,13 +335,13 @@ class TestInventoryApp(unittest.TestCase):
             'location':'elsewhere',
             'value':56000,
             'status':'missing'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,409)
         self.assertFalse(data['success'])
 
     def test_add_item_unprocessable(self):
-        result=self.client.post('/items/add')
+        result=self.client.post('/items/add', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,422)
         self.assertFalse(data['success'])
@@ -364,7 +355,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'shortliveditem',
             'status':'borrowed for min',
             'date_updated':str(datetime(2022,4,1))
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -376,7 +367,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'shortliveditem',
             'status':'borrowed for min',
             'date_updated':str(datetime(2022,4,1))
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -389,7 +380,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'wrongName',
             'status':'borrowed for min',
             'date_updated':str(datetime(2022,4,1))
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,409)
         self.assertFalse(data['success'])
@@ -405,7 +396,7 @@ class TestInventoryApp(unittest.TestCase):
             'name':'shortliveditem',
             'container_id':1,
             'date_updated':str(datetime(2022,4,1))
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -417,25 +408,24 @@ class TestInventoryApp(unittest.TestCase):
             'name':'shortliveditem',
             'container_id':2,
             'date_updated':str(datetime(2022,4,1))
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
         self.assertEqual(data['container'],2)
 
-
     #DELETE items/<int:id>
     def test_delete_item(self):
         self.prep_insert_item('shortliveditem')
         self.assertIsNotNone(Item.query.filter(Item.id==1).one_or_none())
-        result=self.client.delete('/items/1')
+        result=self.client.delete('/items/1', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
         self.assertIsNone(Item.query.filter(Item.id==1).one_or_none())
 
     def test_delete_item_not_found(self):
-        result=self.client.delete('/items/4321')
+        result=self.client.delete('/items/4321', headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
@@ -446,7 +436,7 @@ class TestInventoryApp(unittest.TestCase):
         result=self.client.post('/items/search',
         json={
             'search_term':'Lived'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,200)
         self.assertTrue(data['success'])
@@ -462,12 +452,61 @@ class TestInventoryApp(unittest.TestCase):
         result=self.client.post('/items/search',
         json={
             'search_term':'quack'
-        })
+        }, headers={'Authorization':'Bearer '+self.token})
         data=json.loads(result.data)
         self.assertEqual(result.status_code,404)
         self.assertFalse(data['success'])
 
-    
+    #AUTHORIZATION
+
+    def test_authorised_to_add_item(self):
+        token=environ['DOCUMENTER_TOKEN']
+        result=self.client.post('/items/add',
+        json={
+            "name":"a new item",
+            "location":"somewhere",
+            "value":456,
+            "status":"ok"
+        }, headers={'Authorization':'Bearer '+token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+
+    def test_not_authorised_to_add_item(self):
+        token=environ['ORGANISER_TOKEN']
+        result=self.client.post('/items/add',
+        json={
+            "name":"a new item",
+            "location":"somewhere",
+            "value":456,
+            "status":"ok"
+        }, headers={'Authorization':'Bearer '+token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,403)
+
+
+    def test_authorised_to_add_container(self):
+        token=environ['ORGANISER_TOKEN']
+        result=self.client.post('/containers/add',
+        json={
+            "name":"a great big cool dark container",
+            "location":"on the other side of the room",
+            "container_value":5000
+        }, headers={'Authorization':'Bearer '+token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,200)
+        self.assertTrue(data['success'])
+
+    def test_not_authorised_to_add_container(self):
+        token=environ['DOCUMENTER_TOKEN']
+        result=self.client.post('/containers/add',
+        json={
+            "name":"a great big cool dark container",
+            "location":"on the other side of the room",
+            "container_value":5000
+        }, headers={'Authorization':'Bearer '+token})
+        data=json.loads(result.data)
+        self.assertEqual(result.status_code,403)
 
 if __name__=="__main__":
     unittest.main()

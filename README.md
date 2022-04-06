@@ -25,7 +25,13 @@ The Flask application can then be run (in development mode) using:
 The app will run locally using an sqlite database. When hosted on Heroku, the postgresql is used instead as determined by the DATABASE_URL environmental variable.
 
 # Authentication
-setup.sh also contains tokens for authentication.
+setup.sh also contains tokens for authentication and authorization.
+
+The following roles are used for authorization at endpoints:
+- Inventory Admin   - all permisions granted
+- Documenter        - get:containers, get:items, patch:items, post:items
+- Organiser         - get:containers, get:items, patch:items, patch:containers, post:containers
+- Mover             - get:containers, patch:containers
 
 # API Endpoints
 
@@ -76,12 +82,12 @@ POST /items/add
 PATCH /items/update
 - updates item with the given details and updates its container or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; returns 409 error if location is stated but does not match the container location
 - sample request:
-    curl -X POST -H 'Content-Type: application/json' -d '{"name":"a new item", "location":"somewhere","value":456,"status":"ok"}' https://productivity-inventory.herokuapp.com/items/add
+    curl -X PATCH -H 'Content-Type: application/json' -d '{"id":6,"name":"a new item", "location":"diff location","value":111,"status":"uncertain"}' https://productivity-inventory.herokuapp.com/items/update
 - sample response:
-    {"Total Items":6,"success":true}
+    {"Total Items":6,"container":null,"success":true}
 
 PATCH /items/search
-- returns items containing the given search term
+- returns items containing the given search term or 404 error if nothing matches
 - sample request:
     curl -X POST -H 'Content-Type: application/json' -d '{"search_term":"another"}' https://productivity-inventory.herokuapp.com/items/search
 - sample response:
@@ -97,7 +103,7 @@ PATCH /items/search
 DELETE /items/<int:id>
 - deletes the specified item
 - sample request:
-    curl -X DELETE  https://productivity-inventory.herokuapp.com/containers/1
+    curl -X DELETE  https://productivity-inventory.herokuapp.com/items/1
 - sample response:
     {"success":true}
 
@@ -139,11 +145,28 @@ POST /containers/add
     {"Total Containers":4,"success":true}
 
 PATCH /containers/update
-- updates container with the given details or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; returns 409 error if location is stated but does not match the container location
+- updates container with the given details or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; if location is stated, all contained items will also have their location updated
 - sample request:
-    curl -X POST -H 'Content-Type: application/json' -d '{"name":"a new item", "location":"somewhere","value":456,"status":"ok"}' https://productivity-inventory.herokuapp.com/items/add
+    curl -X PATCH -H 'Content-Type: application/json' -d '{"id":4,"name":"a great big cool dark container", "location":"a changed location","container_value":789}' https://productivity-inventory.herokuapp.com/containers/update
 - sample response:
-    {"Total Items":6,"success":true}
+    {"container_value":789,"id":4,"items":[],"location":"a changed location","name":"a great big cool dark container","success":true,"total_value":789}
 
 PATCH /containers/search
-DELETE /containers/delete
+- returns containers containing the given search term or 404 error if nothing matches
+- sample request:
+    curl -X POST -H 'Content-Type: application/json' -d '{"search_term":"other"}' https://productivity-inventory.herokuapp.com/containers/search
+- sample response:
+    {
+        "results":[
+            {"container_value":200,"id":2,"items":[],"location":"somewhere","name":"myOtherContainer","total_value":866},
+            {"container_value":200,"id":3,"items":[],"location":"somewhere","name":"myOtherContainer0","total_value":0}
+            ],
+        "success":true
+    }
+
+DELETE /containers/<int:id>
+- deletes the specified container
+- sample request:
+    curl -X DELETE  https://productivity-inventory.herokuapp.com/containers/1
+- sample response:
+    {"success":true}

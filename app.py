@@ -50,8 +50,8 @@ def create_app(test_config=None):
     return jsonify(response)
 
   @app.route('/containers', methods=['GET'])
-  #@requires_auth('get:containers')
-  def containers(*args):
+  @requires_auth('get:containers')
+  def containers(payload):
 
     containers={c.id:c.name for c in Container.query.all()}
     response={
@@ -62,7 +62,8 @@ def create_app(test_config=None):
     return jsonify(response)
 
   @app.route('/containers/<string:name>', methods=['GET'])
-  def containers_search_by_name(name):
+  @requires_auth('get:containers')
+  def containers_search_by_name(payload,name):
     container=Container.query.filter(Container.name==name).one_or_none()
     if container == None:
       abort(404)
@@ -78,7 +79,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/containers/<int:id>', methods=['GET'])
-  def containers_search_by_id(id):
+  @requires_auth('get:containers')
+  def containers_search_by_id(payload,id):
     container=Container.query.filter(Container.id==id).one_or_none()
     if container == None:
       abort(404)
@@ -94,7 +96,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/containers/add', methods=['POST'])
-  def containers_add():
+  @requires_auth('post:containers')
+  def containers_add(payload):
     try:
       data = request.get_json()
     except:
@@ -118,7 +121,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/containers/update', methods=['PATCH'])
-  def container_update():
+  @requires_auth('patch:containers')
+  def container_update(payload):
     try:
       data = request.get_json()
     except:
@@ -152,7 +156,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/containers/<int:id>', methods=['DELETE'])
-  def containers_delete_by_id(id):
+  @requires_auth('delete:containers')
+  def containers_delete_by_id(payload,id):
     container=Container.query.filter(Container.id==id).one_or_none()
     if container == None:
       abort(404)
@@ -163,7 +168,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/containers/search', methods=['POST'])
-  def containers_search():
+  @requires_auth('get:containers')
+  def containers_search(payload):
     try:
       data=request.get_json()
       search_term=data['search_term'].lower()
@@ -189,7 +195,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items', methods=['GET'])
-  def items(*args):
+  @requires_auth('get:items')
+  def items(payload):
 
     items={c.id:c.name for c in Item.query.all()}
     response={
@@ -200,7 +207,8 @@ def create_app(test_config=None):
     return jsonify(response)
 
   @app.route('/items/<string:name>', methods=['GET'])
-  def items_search_by_name(name):
+  @requires_auth('get:items')
+  def items_search_by_name(payload,name):
     item=Item.query.filter(Item.name==name).one_or_none()
     if item == None:
       abort(404)
@@ -214,7 +222,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items/<int:id>', methods=['GET'])
-  def items_search_by_id(id):
+  @requires_auth('get:items')
+  def items_search_by_id(payload,id):
     item=Item.query.filter(Item.id==id).one_or_none()
     if item == None:
       abort(404)
@@ -228,7 +237,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items/add', methods=['POST'])
-  def items_add():
+  @requires_auth('post:items')
+  def items_add(payload):
     try:
       data = request.get_json()
     except:
@@ -274,7 +284,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items/update', methods=['PATCH'])
-  def item_update():
+  @requires_auth('patch:items')
+  def item_update(payload):
     try:
       data = request.get_json()
     except:
@@ -293,6 +304,7 @@ def create_app(test_config=None):
       if item.container_id!=None and Container.query.get(item.container_id).location!=data['location']:
         abort(409)
       item.location=data['location']
+    original_value=0
     if 'value' in data:
       original_value=item.value
       item.value=data['value']
@@ -324,7 +336,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items/<int:id>', methods=['DELETE'])
-  def items_delete_by_id(id):
+  @requires_auth('delete:items')
+  def items_delete_by_id(payload,id):
     item=Item.query.filter(Item.id==id).one_or_none()
     if item == None:
       abort(404)
@@ -335,7 +348,8 @@ def create_app(test_config=None):
     return response
 
   @app.route('/items/search', methods=['POST'])
-  def items_search():
+  @requires_auth('get:items')
+  def items_search(payload):
     try:
       data=request.get_json()
       search_term=data['search_term'].lower()

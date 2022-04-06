@@ -91,9 +91,11 @@ def verify_decode_jwt(token):
 
 def check_permissions(permission, payload):
     if 'permissions' not in payload:
-        abort(400)
+        raise AuthError({'code':'bad request',
+                        'description':'missing permissions'},400)
     if permission not in payload['permissions']:
-        abort(403)
+        raise AuthError({'code':'forbidden',
+                        'description':'you do not have permission to do that'},403)
     return True
 
 
