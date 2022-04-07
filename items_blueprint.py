@@ -11,7 +11,7 @@ items_blueprint = Blueprint('items_blueprint',__name__)
 @items_blueprint.route('/items', methods=['GET'])
 @requires_auth('get:items')
 def items(payload):
-    """fetches a list of the items in key-value pairs with the format id:name"""
+    """This enpoint fetches a list of the items in key-value pairs with the format id:name."""
     items={c.id:c.name for c in Item.query.all()}
     response={
         'success':True,
@@ -23,7 +23,7 @@ def items(payload):
 @items_blueprint.route('/items/<string:name>', methods=['GET'])
 @requires_auth('get:items')
 def items_search_by_name(payload,name):
-    """fetches details of the named item or returns a 404 code if there is no match"""
+    """This enpoint fetches details of the named item or returns a 404 code if there is no match."""
     item=Item.query.filter(Item.name==name).one_or_none()
     if item == None:
         abort(404)
@@ -39,7 +39,7 @@ def items_search_by_name(payload,name):
 @items_blueprint.route('/items/<int:id>', methods=['GET'])
 @requires_auth('get:items')
 def items_search_by_id(payload,id):
-    """fetches details of the item with the given id or returns a 404 code if there is no match"""
+    """This enpoint fetches details of the item with the given id or returns a 404 code if there is no match"""
     item=Item.query.filter(Item.id==id).one_or_none()
     if item == None:
         abort(404)
@@ -55,7 +55,7 @@ def items_search_by_id(payload,id):
 @items_blueprint.route('/items/add', methods=['POST'])
 @requires_auth('post:items')
 def items_add(payload):
-    """adds item with the given details"""
+    """This enpoint adds item with the given details"""
     try:
         data = request.get_json()
     except:
@@ -105,7 +105,7 @@ def items_add(payload):
 @items_blueprint.route('/items/update', methods=['PATCH'])
 @requires_auth('patch:items')
 def item_update(payload):
-    """updates item with the given details and updates its container or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; returns 409 error if location is stated but does not match the container location"""
+    """This enpoint updates item with the given details and updates its container or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; returns 409 error if location is stated but does not match the container location"""
     try:
         data = request.get_json()
     except:
@@ -160,7 +160,7 @@ def item_update(payload):
 @items_blueprint.route('/items/<int:id>', methods=['DELETE'])
 @requires_auth('delete:items')
 def items_delete_by_id(payload,id):
-    """deletes the specified item"""
+    """This enpoint deletes the specified item"""
     item=Item.query.filter(Item.id==id).one_or_none()
     if item == None:
         abort(404)
@@ -173,7 +173,7 @@ def items_delete_by_id(payload,id):
 @items_blueprint.route('/items/search', methods=['POST'])
 @requires_auth('get:items')
 def items_search(payload):
-    """returns items containing the given search term or 404 error if nothing matches"""
+    """This enpoint returns items containing the given search term or 404 error if nothing matches"""
     try:
         data=request.get_json()
         search_term=data['search_term'].lower()

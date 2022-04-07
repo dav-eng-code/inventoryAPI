@@ -11,7 +11,7 @@ containers_blueprint = Blueprint('containers_blueprint',__name__)
 @containers_blueprint.route('/containers', methods=['GET'])
 @requires_auth('get:containers')
 def containers(payload):
-    """fetches details of the container with the given id or returns a 404 code if there is no match"""
+    """This enpoint fetches details of the container with the given id or returns a 404 code if there is no match"""
     containers={c.id:c.name for c in Container.query.all()}
     response={
         'success':True,
@@ -23,7 +23,7 @@ def containers(payload):
 @containers_blueprint.route('/containers/<string:name>', methods=['GET'])
 @requires_auth('get:containers')
 def containers_search_by_name(payload,name):
-    """fetches details of the named container or returns a 404 code if there is no match"""
+    """This enpoint fetches details of the named container or returns a 404 code if there is no match"""
     container=Container.query.filter(Container.name==name).one_or_none()
     if container == None:
         abort(404)
@@ -41,7 +41,7 @@ def containers_search_by_name(payload,name):
 @containers_blueprint.route('/containers/<int:id>', methods=['GET'])
 @requires_auth('get:containers')
 def containers_search_by_id(payload,id):
-    """fetches details of the container with the given id or returns a 404 code if there is no match"""
+    """This enpoint fetches details of the container with the given id or returns a 404 code if there is no match"""
     container=Container.query.filter(Container.id==id).one_or_none()
     if container == None:
         abort(404)
@@ -59,7 +59,7 @@ def containers_search_by_id(payload,id):
 @containers_blueprint.route('/containers/add', methods=['POST'])
 @requires_auth('post:containers')
 def containers_add(payload):
-    """adds a new container with the given attributes"""
+    """This enpoint adds a new container with the given attributes"""
     try:
         data = request.get_json()
     except:
@@ -87,7 +87,7 @@ def containers_add(payload):
 @containers_blueprint.route('/containers/update', methods=['PATCH'])
 @requires_auth('patch:containers')
 def container_update(payload):
-    """updates container with the given details or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; if location is stated, all contained items will also have their location updated"""
+    """This enpoint updates container with the given details or returns 404 error if no matching id; requires the name and returns 409 error if the name does not match for the given id; if location is stated, all contained items will also have their location updated"""
     try:
         data = request.get_json()
     except:
@@ -124,7 +124,7 @@ def container_update(payload):
 @containers_blueprint.route('/containers/<int:id>', methods=['DELETE'])
 @requires_auth('delete:containers')
 def containers_delete_by_id(payload,id):
-    """deletes the specified container"""
+    """This enpoint deletes the specified container"""
     container=Container.query.filter(Container.id==id).one_or_none()
     if container == None:
         abort(404)
@@ -137,7 +137,7 @@ def containers_delete_by_id(payload,id):
 @containers_blueprint.route('/containers/search', methods=['POST'])
 @requires_auth('get:containers')
 def containers_search(payload):
-    """returns containers containing the given search term or 404 error if nothing matches"""
+    """This enpoint returns containers containing the given search term or 404 error if nothing matches"""
     try:
         data=request.get_json()
         search_term=data['search_term'].lower()
