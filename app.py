@@ -14,7 +14,7 @@ def create_app(test_config=None):
   app = Flask(__name__)
   app.register_blueprint(items_blueprint)
   app.register_blueprint(containers_blueprint)
-  #CORS(app)
+  CORS(app)
 
   DATABASE_URL=environ['DATABASE_URL'].replace('postgres://','postgresql://',1)
   
