@@ -2,7 +2,9 @@
 inventory API
 
 # Overview
-This API allows the recording and management of an inventory, for example when moving house. There are two models provided:
+This API allows the recording and management of an inventory, for example when moving house. The API should make it much easier to log and keep track of items in such a situation.
+
+There are two models provided:
 - items - these are the essential components of the inventory, each with at least a value and location.
 - containers - these allow the grouping of items into a container which represents a physical container that may also have its own value. The container has attributes that provide the number of contained items, total value and location which must be automatically inherited by any contained items.
 
@@ -23,6 +25,18 @@ The Flask application can then be run (in development mode) using:
     flask run
 
 The app will run locally using an sqlite database. When hosted on Heroku, the postgresql is used instead as determined by the DATABASE_URL environmental variable.
+
+# Hosting Instructions
+This project can be pushed straight to Heroku using the Heroku CLI and normal git commands.
+
+Alternatively, the code for this project is hosted on GitHub. When new code is pushed ot dav-eng-code/inventoryAPI, this is automatically available on the connected Heroku account. The API can then be deployed from the Heroku web interface.
+
+The API requires the Heroku Postgres add-on. Adding this will automatically add the required environmental variable DATABASE_URL. The other environmental variables to be set are as follows:
+ALGORITHMS      [RS256]
+API_AUDIENCE    https://productivity-inventory.herokuapp.com/
+CALLBACK_URL    https://productivity-inventory.herokuapp.com
+CLIENT_ID       Q7pQU8jGRAiOCGEqn55STzPPmevq3rsb
+DOMAIN          dav-eng-code-testing.eu.auth0.com
 
 # Authentication
 setup.sh also contains tokens for authentication and authorization.
