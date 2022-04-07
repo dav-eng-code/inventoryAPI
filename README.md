@@ -17,7 +17,7 @@ To run this project locally, install all dependancies from the requirements.txt 
 The project can be setup from the top-level directory of the project (the folder containing app.py) using the following commands:
 
     python -m venv project_venv
-    pip install -r requirements.txt
+    pip3 install -r requirements.txt
 
 The Flask application can then be run (in development mode) using:
 
@@ -153,6 +153,7 @@ GET /containers/<int:id>
     {"container_value":200,"id":2,"items":[],"location":"somewhere","name":"myOtherContainer","success":true,"total_value":866}
 
 POST /containers/add
+- adds a new container with the given attributes
 - sample request:
     curl -X POST -H 'Content-Type: application/json' -d '{"name":"a great big cool dark container", "location":"on the other side of the room","container_value":5000}' https://productivity-inventory.herokuapp.com/containers/add
 - sample response:
